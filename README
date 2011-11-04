@@ -1,0 +1,71 @@
+   _____                .__              ________   
+  /     \ _____    ____ |  |__           \_____  \  
+ /  \ /  \\__  \ _/ ___\|  |  \   ______  /   |   \ 
+/    Y    \/ __ \\  \___|   Y  \ /_____/ /    |    \
+\____|__  (____  /\___  >___|  /         \_______  /
+        \/     \/     \/     \/                  \/ 
+__________.__               .__        
+\______   \  |  __ __  ____ |__| ____  
+ |     ___/  | |  |  \/ ___\|  |/    \ 
+ |    |   |  |_|  |  / /_/  >  |   |  \
+ |____|   |____/____/\___  /|__|___|  /
+                    /_____/         \/  v0.3
+ 
+(c) 2011, fG! - reverser@put.as - http://reverse.put.as
+
+This is a very simple IDA plugin to display Mach-O header information.
+A custom view is created with this information and the header fields inside the IDA
+disassembly are commented and put together.
+It's more or less a port of otool functionality into IDA.
+Never understood why IDA doesn't solve executable headers :-)
+Supports x86, x86_64, ppc, arm (iOS) mach-o binaries.
+
+Some commands aren't implemented (obsolete/rare ones) and the LC_UNIXTHREAD/LC_THREAD
+for now only displays thread state flavors (the most common case).
+
+The 64bits version has some problems in the header comments.
+I can't get the Quadro word command to work right (bug?).
+
+Tested with Mac OS X version and Windows. Should also work in Linux :-)
+
+To compile for OS X use the Makefile or the XCode Project.
+You will need to edit the Makefile or the XCode project and set the paths to the SDK.
+Refer to http://reverse.put.as/2011/10/31/how-to-create-ida-cc-plugins-with-xcode/ for XCode.
+Set the environment variable __EA64__ if you want the plugin for IDA 64bits.
+
+For Windows, DEVC++ project file is included for IDA 32 and 64 bits versions.
+You will need to edit the DEVC++ project and set the paths to the SDK and plugin binary output.
+Please refer to http://www.binarypool.com/idapluginwriting/ for more information.
+You should do a Rebuild All in DEVC++ (especially if you switch from 32 to 64 project or vice-versa).
+
+The default shortcut is set to Alt-X. You maybe want to modify it.
+Edit IDAP_hotkey at machoplugin.cpp to your own preference.
+
+Bug reports, fixes and patches are welcome: reverser@put.as
+
+IDA BUGS:
+I seem to have found a few bugs in IDA QT GUI implementation.
+The most annoying one is that the plugin will crash IDA if called more than once in the same session.
+What happens is that IDA happilly keeps opening new custom views even if there is code trying to prevent it.
+The create_tform() function from the SDK should return a new handle if there is already a form with the 
+same caption. Well this works with the old GUI but fails with the new one (QT). The same happens with find_tform.
+In this case, it never returns NULL if there's no form (which is the expected behavior).
+I implemented a small workaround, which is to add a number to the form caption. This way each call to the plugin
+will generate a new custom view and not crash IDA. Not pretty but the other workarounds I tried failed since I can't
+find if form exists or not.
+
+Another bug is related to the PLUGIN_UNL flag. It is used to "Unload the plugin immediately after calling 'run'.".
+If this option is set, it crashes the Windows version. Mac version seems do to fine with it.
+
+Last bug is related to the Quadro Word implementation. It doesn't seem to work ok. This creates some problems to
+comment the 64bits binaries header.
+
+That's it! Enjoy :-)
+
+fG!
+
+v0.3 - fix the plugin crash if called more than once
+     - comment the LC_THREAD/LC_UNIXTHREAD registers, which were missing
+	 - some other small bug fixes
+	 - removed the copy script that was still present in the xcode project
+	 
